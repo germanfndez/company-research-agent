@@ -84,17 +84,3 @@ pip install -r requirements.txt
 python main.py
 ```
 
-## Swapping the mock LLM for a real model
-
-Only `call_llm()` in `src/llm.py` needs to change:
-
-```python
-def call_llm(prompt: str) -> str:
-    response = openai.chat.completions.create(
-        model="gpt-4o",
-        messages=[{"role": "user", "content": prompt}],
-    )
-    return response.choices[0].message.content
-```
-
-The agent loop, skills, hooks, and state are untouched.
