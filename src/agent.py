@@ -22,7 +22,6 @@ def run_agent(
     turn = 0
 
     while not state.is_finished:
-        # Guard: prevent infinite loops
         if turn >= max_turns:
             print(f"[agent] Max turns ({max_turns}) reached without finishing.")
             state.errors.append(f"Max turns exceeded: {max_turns}")
@@ -48,9 +47,8 @@ def run_agent(
             print(f"[agent] Action blocked: {e}")
             state.errors.append(str(e))
             state.is_finished = True
-            continue
+            break
 
-        # Retry loop: attempt the skill up to max_retries times before giving up
         for attempt in range(max_retries):
             try:
                 result = None

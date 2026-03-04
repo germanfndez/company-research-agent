@@ -1,7 +1,6 @@
 from typing import Optional
 from pydantic import BaseModel
 
-
 class AgentState(BaseModel):
     user_prompt: str
     company_info: Optional[dict] = None
