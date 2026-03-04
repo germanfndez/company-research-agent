@@ -24,7 +24,6 @@ def run_agent(
     while not state.is_finished:
         if turn >= max_turns:
             print(f"[agent] Max turns ({max_turns}) reached without finishing.")
-            state.errors.append(f"Max turns exceeded: {max_turns}")
             state.is_finished = True
             break
 
@@ -45,7 +44,6 @@ def run_agent(
                 hook(tool_name, state, permissions)
         except PermissionError as e:
             print(f"[agent] Action blocked: {e}")
-            state.errors.append(str(e))
             state.is_finished = True
             break
 
@@ -78,7 +76,6 @@ def run_agent(
                 else:
                     print(f"[agent] '{tool_name}' failed after {max_retries} attempts. Recording error, letting LLM decide next step.")
                     state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, error=str(e)))
-                    state.errors.append(str(e))
 
     print("\n[agent] Loop finished.")
     return state.final_summary

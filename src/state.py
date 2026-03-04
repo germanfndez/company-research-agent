@@ -14,6 +14,5 @@ class AgentState(BaseModel):
     financial_info: Optional[dict] = None
     final_summary: Optional[str] = None
     
-    errors: list[str] = []
     executions: list[Execution] = []
     is_finished: bool = False
