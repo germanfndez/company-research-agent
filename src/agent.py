@@ -1,7 +1,7 @@
 from .hooks import Permissions, PostHook, PreHook
 from .llm import mock_agent_decision
 from .skills import get_financials, search_company, write_summary
-from .state import AgentState
+from .state import AgentState, Execution
 
 
 def run_agent(
@@ -65,6 +65,8 @@ def run_agent(
                     state.final_summary = write_summary(**tool_args)
                     result = state.final_summary
 
+                state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, result=result))
+
                 for hook in post_hooks:
                     hook(tool_name, result, state)
 
@@ -74,9 +76,9 @@ def run_agent(
                 if attempt < max_retries - 1:
                     print(f"[agent] '{tool_name}' failed (attempt {attempt + 1}/{max_retries}), retrying...")
                 else:
-                    print(f"[agent] '{tool_name}' failed after {max_retries} attempts, stopping.")
+                    print(f"[agent] '{tool_name}' failed after {max_retries} attempts. Recording error, letting LLM decide next step.")
+                    state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, error=str(e)))
                     state.errors.append(str(e))
-                    state.is_finished = True
 
     print("\n[agent] Loop finished.")
     return state.final_summary

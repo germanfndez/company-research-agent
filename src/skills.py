@@ -24,8 +24,8 @@ def write_summary(company_data: dict, financial_data: dict) -> str:
         f"Founded:        {company_data.get('founded', 'N/A')}\n"
         f"\n"
         f"Financials:\n"
-        f"  Revenue:       {financial_data['revenue']}\n"
-        f"  Employees:     {financial_data['employees']}\n"
-        f"  Funding Stage: {financial_data['funding_stage']}\n"
-        f"  Last Funding:  {financial_data['last_funding']}\n"
+        f"  Revenue:       {financial_data.get('revenue', 'N/A')}\n"
+        f"  Employees:     {financial_data.get('employees', 'N/A')}\n"
+        f"  Funding Stage: {financial_data.get('funding_stage', 'N/A')}\n"
+        f"  Last Funding:  {financial_data.get('last_funding', 'N/A')}\n"
     )

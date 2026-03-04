@@ -31,10 +31,16 @@ def call_llm(prompt: str) -> str:
     if '"company_info":null' in prompt:
         return "search_company"
     if '"financial_info":null' in prompt:
+        # If we already wrote the summary (with partial data), we're done
+        if '"final_summary":null' not in prompt:
+            return "FINISH"
+        # Recovery: if get_financials failed before, skip it and write with what we have
+        if '"tool":"get_financials"' in prompt and '"error"' in prompt:
+            return "write_summary"
         return "get_financials"
     if '"final_summary":null' in prompt:
         return "write_summary"
-        
+
     return "FINISH"
 
 
@@ -64,7 +70,10 @@ def mock_agent_decision(state: AgentState) -> ToolCall:
         args = {"query": state.user_prompt}
     elif tool_name == "get_financials" and state.company_info:
         args = {"company_name": state.company_info["name"]}
-    elif tool_name == "write_summary" and state.company_info and state.financial_info:
-        args = {"company_data": state.company_info, "financial_data": state.financial_info}
+    elif tool_name == "write_summary" and state.company_info:
+        args = {
+            "company_data": state.company_info,
+            "financial_data": state.financial_info or {},  # fallback if get_financials failed
+        }
 
     return ToolCall(tool=tool_name, args=args)
