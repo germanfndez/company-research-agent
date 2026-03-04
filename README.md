@@ -8,7 +8,7 @@ Built as a technical assessment to demonstrate agent architecture fundamentals.
 ```
 main.py        → entry point
 src/
-  state.py     → AgentState (Pydantic) — single source of truth
+  state.py     → AgentState + Execution (Pydantic) — single source of truth
   skills.py    → 3 mock tools: search_company, get_financials, write_summary
   hooks.py     → pre/post hooks: logging, human approval, auditing
   llm.py       → mock LLM brain: call_llm() + mock_agent_decision()
@@ -21,42 +21,38 @@ src/
 User prompt
     │
     ▼
-run_agent(prompt, pre_hooks, post_hooks, permissions)
+run_agent(prompt, pre_hooks, post_hooks, permissions, max_turns, max_retries)
     │
     ▼
-┌─────────────────────────────────────────────────────────────────┐
-│  while not state.is_finished:                                   │
-│                                                                 │
-│  1. decision = mock_agent_decision(state)   ← LLM decides      │
-│          │ returns ToolCall { tool, args }                      │
-│          ▼                                                      │
-│  2. pre_hooks(tool, state, permissions)     ← logging / OK?    │
-│          │ raises PermissionError → stop                        │
-│          ▼                                                      │
-│  3. result = skill(**args)                  ← executes tool     │
-│          │ retry up to max_retries on failure                   │
-│          ▼                                                      │
-│  4. state.field = result                    ← updates state     │
-│          ▼                                                      │
-│  5. post_hooks(tool, result, state)         ← audit / notify   │
-│          ▼                                                      │
-│     FINISH? ──YES──► return state.final_summary                 │
-│          │                                                      │
-│          NO (next turn, max_turns guard)                        │
-└─────────────────────────────────────────────────────────────────┘
-```
-
-### Skills executed in order
-
-```
-search_company(query)
-    → state.company_info = { name, location, industry, founded }
-
-get_financials(company_name)
-    → state.financial_info = { revenue, employees, funding_stage }
-
-write_summary(company_data, financial_data)
-    → state.final_summary = "Company Report: ..."
+┌─────────────────────────────────────────────────────────────────────┐
+│  while not state.is_finished:                                       │
+│                                                                     │
+│  0. max_turns guard          ← circuit breaker, hard stop          │
+│         │ exceeded → records Execution(error) → is_finished = True │
+│         ▼                                                           │
+│  1. decision = mock_agent_decision(state)   ← LLM decides          │
+│         │ reads full state + executions history                     │
+│         │ returns ToolCall { tool, args }                           │
+│         ▼                                                           │
+│  2. tool == "FINISH"?  ──YES──► is_finished = True, break          │
+│         │ NO                                                        │
+│         ▼                                                           │
+│  3. pre_hooks(tool, state, permissions)     ← logging / approval   │
+│         │ PermissionError → records Execution(error), skips skill  │
+│         │ (LLM sees the block next turn and decides what to do)    │
+│         ▼                                                           │
+│  4. skill(**args)  [retry up to max_retries]                        │
+│         │ success → records Execution(result)                      │
+│         │ all retries failed → records Execution(error), continues │
+│         │ (LLM sees the failure next turn and decides what to do)  │
+│         ▼                                                           │
+│  5. post_hooks(tool, result, state)         ← audit / notify       │
+│         ▼                                                           │
+│     back to top                                                     │
+└─────────────────────────────────────────────────────────────────────┘
+    │
+    ▼
+return state.final_summary
 ```
 
 ### Permission system
@@ -68,6 +64,12 @@ permissions = {
     "write_summary":  "allow",   # runs automatically
 }
 ```
+
+### Failure recovery
+
+When a skill fails all retries or is blocked by a permission, the agent does **not** stop. The error is recorded in `state.executions` and the loop continues — `mock_agent_decision` reads the full transcript on the next turn and decides the next step.
+
+Example: `get_financials` fails → LLM sees it in the transcript → calls `write_summary` with the partial data available → report is generated with `N/A` for missing financials.
 
 ## Setup
 

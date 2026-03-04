@@ -46,6 +46,7 @@ def run_agent(
         except PermissionError as e:
             print(f"[agent] Action blocked: {e}")
             state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, error=f"Blocked: {e}"))
+            continue 
 
         for attempt in range(max_retries):
             try:
