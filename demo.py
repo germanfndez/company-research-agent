@@ -5,7 +5,7 @@ Run with: python demo.py
 """
 
 from src.agent import run_agent
-from src.hooks import Permissions, audit_post_hook, logging_pre_hook, human_approval_pre_hook
+from src.hooks import Permissions, audit_post_hook, logging_pre_hook
 import src.agent as agent_mod
 
 
@@ -13,12 +13,6 @@ def divider(title: str) -> None:
     print("\n" + "=" * 60)
     print(f"  {title}")
     print("=" * 60)
-
-
-def print_executions(result) -> None:
-    from src.state import AgentState
-    # result is final_summary — we use a wrapper to show executions
-    pass
 
 
 # ─────────────────────────────────────────────

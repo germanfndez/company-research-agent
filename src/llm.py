@@ -35,7 +35,7 @@ def call_llm(prompt: str) -> str:
         if '"final_summary":null' not in prompt:
             return "FINISH"
         # Recovery: if get_financials failed before, skip it and write with what we have
-        if '"tool":"get_financials"' in prompt and '"error"' in prompt:
+        if '"tool":"get_financials"' in prompt and '"error":"' in prompt:
             return "write_summary"
         return "get_financials"
     if '"final_summary":null' in prompt:
