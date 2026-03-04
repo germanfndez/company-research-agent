@@ -64,6 +64,9 @@ def run_agent(
                     state.final_summary = write_summary(**tool_args)
                     result = state.final_summary
 
+                else:
+                    raise ValueError(f"Unknown tool: '{tool_name}'")
+
                 state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, result=result))
 
                 for hook in post_hooks:
