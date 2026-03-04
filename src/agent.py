@@ -24,6 +24,7 @@ def run_agent(
     while not state.is_finished:
         if turn >= max_turns:
             print(f"[agent] Max turns ({max_turns}) reached without finishing.")
+            state.executions.append(Execution(turn=turn, tool="__agent__", args={}, error=f"Max turns exceeded: {max_turns}"))
             state.is_finished = True
             break
 
@@ -44,8 +45,7 @@ def run_agent(
                 hook(tool_name, state, permissions)
         except PermissionError as e:
             print(f"[agent] Action blocked: {e}")
-            state.is_finished = True
-            break
+            state.executions.append(Execution(turn=turn, tool=tool_name, args=tool_args, error=f"Blocked: {e}"))
 
         for attempt in range(max_retries):
             try:
