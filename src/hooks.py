@@ -1,5 +1,5 @@
 from typing import Any, Callable, Literal
-from state import AgentState
+from .state import AgentState
 
 # A skill can either run automatically or require human confirmation
 Permission = Literal["allow", "ask"]

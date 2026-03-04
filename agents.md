@@ -10,12 +10,13 @@ No real LLM API is used — the decision logic is mocked to evaluate pure agent 
 ## Architecture
 
 ```
-state.py    AgentState (Pydantic) — single source of truth for the loop
-skills.py   3 mock tools: search_company, get_financials, write_summary
-hooks.py    Pre/post hook system with typed permissions per skill
-llm.py      call_llm() API boundary + mock_agent_decision() brain
-agent.py    run_agent() — the while loop orchestrator
-main.py     Entry point
+main.py         Entry point
+src/
+  state.py      AgentState (Pydantic) — single source of truth for the loop
+  skills.py     3 mock tools: search_company, get_financials, write_summary
+  hooks.py      Pre/post hook system with typed permissions per skill
+  llm.py        call_llm() API boundary + mock_agent_decision() brain
+  agent.py      run_agent() — the while loop orchestrator
 ```
 
 ## Agent loop flow
