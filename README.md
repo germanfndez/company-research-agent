@@ -1,7 +1,6 @@
 # Company Research Agent
 
 A custom AI agent loop that autonomously researches a company using sequential skills.
-Built as a technical assessment to demonstrate agent architecture fundamentals.
 
 ## Architecture
 
