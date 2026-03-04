@@ -8,10 +8,13 @@ def run_agent(
     prompt: str,
     max_turns: int = 10,
     max_retries: int = 3,
-    pre_hooks: list[PreHook] = [],
-    post_hooks: list[PostHook] = [],
-    permissions: Permissions = {},
+    pre_hooks: list[PreHook] | None = None,
+    post_hooks: list[PostHook] | None = None,
+    permissions: Permissions | None = None,
 ) -> str | None:
+    pre_hooks = pre_hooks or []
+    post_hooks = post_hooks or []
+    permissions = permissions or {}
 
     state = AgentState(user_prompt=prompt)
     print(f"\n[agent] Starting. Task: '{prompt}'\n")
