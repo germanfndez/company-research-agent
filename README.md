@@ -68,8 +68,6 @@ permissions = {
 
 When a skill fails all retries or is blocked by a permission, the agent does **not** stop. The error is recorded in `state.executions` and the loop continues — `mock_agent_decision` reads the full transcript on the next turn and decides the next step.
 
-Example: `get_financials` fails → LLM sees it in the transcript → calls `write_summary` with the partial data available → report is generated with `N/A` for missing financials.
-
 ## Setup
 
 ```bash
